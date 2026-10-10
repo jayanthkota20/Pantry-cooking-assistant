@@ -146,9 +146,125 @@
       "Mix well and serve hot."
     ]
   },
+    {
+    "id": "indian_spinach_dal",
+    "name": "Spinach Dal",
+    "cuisine": "Indian",
+    "main_ingredients": ["spinach"],
+    "minutes": 40,
+    "servings": 3,
+    "ingredients": [
+      "spinach",
+      "toor dal",
+      "onion",
+      "tomato",
+      "garlic",
+      "cumin",
+      "turmeric",
+      "chili powder",
+      "oil",
+      "salt"
+    ],
+    "instructions": [
+      "Rinse three-quarters of a cup of toor dal. Place in a saucepan with 3 cups of water and a quarter teaspoon of turmeric.",
+      "Bring to a boil, then simmer partially covered for 25–35 minutes until soft. Add more hot water if needed.",
+      "Wash and chop 3 cups of spinach. Chop 1 small onion, 1 tomato, and 3 garlic cloves.",
+      "In a separate pan, heat 1 tablespoon of oil. Add half a teaspoon of cumin seeds, followed by the onion and garlic. Cook until softened.",
+      "Add the tomato and half a teaspoon of chili powder. Cook for 5 minutes.",
+      "Add the spinach and cook until wilted.",
+      "Stir the spinach mixture into the cooked dal. Add half a teaspoon of salt and water as needed for your preferred consistency.",
+      "Simmer for 5 minutes and serve."
+    ]
+  },
+  {
+    "id": "indian_palak_paneer",
+    "name": "Palak Paneer",
+    "cuisine": "Indian",
+    "main_ingredients": ["spinach"],
+    "minutes": 30,
+    "servings": 3,
+    "ingredients": [
+      "spinach",
+      "paneer",
+      "onion",
+      "tomato",
+      "ginger",
+      "garlic",
+      "cumin",
+      "garam masala",
+      "cream",
+      "oil",
+      "salt"
+    ],
+    "instructions": [
+      "Wash 250 g spinach. Blanch in boiling water for 1–2 minutes, then drain and rinse with cold water.",
+      "Blend the spinach with a little clean water into a puree.",
+      "Heat 1 tablespoon of oil in a saucepan. Add half a teaspoon of cumin seeds and 1 finely chopped onion. Cook until softened.",
+      "Add 1 teaspoon each of minced ginger and garlic. Cook for 1 minute.",
+      "Add 1 finely chopped tomato and cook until soft.",
+      "Stir in the spinach puree, half a teaspoon of garam masala, and half a teaspoon of salt. Gently simmer for 5 minutes.",
+      "Add 250 g cubed paneer and 2 tablespoons of cream. Add a little water if needed.",
+      "Gently simmer for another 3–5 minutes and serve."
+    ]
+  },
+  {
+    "id": "indian_spinach_garlic_rice",
+    "name": "Spinach and Garlic Rice",
+    "cuisine": "Indian",
+    "main_ingredients": ["spinach"],
+    "minutes": 15,
+    "servings": 2,
+    "ingredients": [
+      "spinach",
+      "rice",
+      "garlic",
+      "cumin",
+      "pepper",
+      "oil",
+      "salt"
+    ],
+    "instructions": [
+      "Prepare 2 cups of cooked rice. The listed time assumes the rice is already cooked.",
+      "Wash and chop 2 cups of spinach. Finely chop 4 garlic cloves.",
+      "Heat 1 tablespoon of oil in a large pan. Add half a teaspoon of cumin seeds.",
+      "Add the garlic and cook over medium-low heat for about 1 minute without burning it.",
+      "Add the spinach and cook for 3–4 minutes until wilted.",
+      "Add the cooked rice, a quarter teaspoon of pepper, and a quarter teaspoon of salt.",
+      "Mix gently and cook until the rice is hot throughout, then serve."
+    ]
+  },
+  {
+    "id": "indian_spinach_curry",
+    "name": "Simple Spinach Curry",
+    "cuisine": "Indian",
+    "main_ingredients": ["spinach"],
+    "minutes": 25,
+    "servings": 2,
+    "ingredients": [
+      "spinach",
+      "onion",
+      "tomato",
+      "garlic",
+      "cumin",
+      "turmeric",
+      "chili powder",
+      "oil",
+      "salt"
+    ],
+    "instructions": [
+      "Wash and chop 300 g spinach. Chop 1 small onion, 1 tomato, and 3 garlic cloves.",
+      "Heat 1 tablespoon of oil in a saucepan. Add half a teaspoon of cumin seeds.",
+      "Add the onion and garlic. Cook until the onion softens.",
+      "Add the tomato, a quarter teaspoon of turmeric, half a teaspoon of chili powder, and half a teaspoon of salt.",
+      "Cook for 5 minutes until the tomato softens.",
+      "Add the spinach in batches, stirring as it wilts.",
+      "Add a quarter cup of water and simmer for 5–8 minutes until the spinach is tender. Serve."
+    ]
+  },
   {
     "id": "indian_chicken_fried_rice",
     "name": "Indo-Chinese Chicken Fried Rice",
+    "main_ingredients": ["chicken", "rice"],
     "cuisine": "Indian",
     "minutes": 25,
     "servings": 2,
