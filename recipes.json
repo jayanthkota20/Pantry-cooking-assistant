@@ -1,0 +1,350 @@
+[
+  {
+    "id": "indian_vegetable_pulao",
+    "name": "Simple Vegetable Pulao",
+    "cuisine": "Indian",
+    "minutes": 30,
+    "servings": 2,
+    "ingredients": [
+      "rice",
+      "carrot",
+      "onion",
+      "peas",
+      "oil",
+      "cumin",
+      "salt"
+    ],
+    "instructions": [
+      "Rinse 1 cup of uncooked rice. Dice 1 carrot and 1 small onion.",
+      "Heat 1 tablespoon of oil in a saucepan. Add 1 teaspoon of cumin seeds, then the onion. Cook until softened.",
+      "Add the carrot and half a cup of peas. Cook for 3 minutes.",
+      "Add the rice, 2 cups of water, and half a teaspoon of salt.",
+      "Bring to a boil, cover, and reduce the heat to low. Cook for 15–18 minutes, until the rice is tender and the water is absorbed.",
+      "Turn off the heat, rest covered for 5 minutes, then fluff with a fork."
+    ]
+  },
+  {
+    "id": "korean_kimchi_fried_rice",
+    "name": "Simple Kimchi Fried Rice",
+    "cuisine": "Korean",
+    "minutes": 15,
+    "servings": 2,
+    "ingredients": [
+      "rice",
+      "kimchi",
+      "eggs",
+      "oil",
+      "soy sauce"
+    ],
+    "instructions": [
+      "Use 2 cups of cooked rice and chop 1 cup of kimchi.",
+      "Heat 1 tablespoon of oil in a frying pan. Add the kimchi and cook for 3 minutes.",
+      "Add the rice and 1 teaspoon of soy sauce. Stir-fry until hot throughout.",
+      "In a separate pan, fry 2 eggs until the whites and yolks are set.",
+      "Divide the rice between two bowls and top each with an egg."
+    ]
+  },
+  {
+    "id": "japanese_onigiri",
+    "name": "Simple Onigiri",
+    "cuisine": "Japanese",
+    "minutes": 15,
+    "servings": 2,
+    "ingredients": [
+      "rice",
+      "nori",
+      "salt"
+    ],
+    "instructions": [
+      "Prepare 2 cups of warm, cooked Japanese short-grain rice.",
+      "Wet your hands with clean water and lightly sprinkle them with salt.",
+      "Divide the rice into 4 portions.",
+      "Gently shape each portion into a triangle or ball.",
+      "Wrap each rice ball with a strip of nori and serve."
+    ]
+  },
+  {
+    "id": "american_cheese_omelet",
+    "name": "Cheese Omelet",
+    "cuisine": "American",
+    "minutes": 10,
+    "servings": 1,
+    "ingredients": [
+      "eggs",
+      "cheese",
+      "butter",
+      "salt"
+    ],
+    "instructions": [
+      "Beat 2 eggs with a small pinch of salt.",
+      "Melt 1 teaspoon of butter in a small nonstick pan over medium-low heat.",
+      "Pour in the eggs. Gently move the cooked edges toward the center, letting uncooked egg flow underneath.",
+      "When the top is almost set, add a quarter cup of shredded cheese to one half.",
+      "Fold the omelet over the cheese and cook until the egg is fully set and the cheese melts."
+    ]
+  },
+    {
+    "id": "indian_chicken_biryani",
+    "name": "Simple Chicken Biryani",
+    "cuisine": "Indian",
+    "minutes": 70,
+    "servings": 3,
+    "ingredients": [
+      "chicken", "rice", "onion", "yogurt",
+      "ginger", "garlic", "biryani masala",
+      "turmeric", "chili powder", "mint",
+      "coriander", "oil", "salt"
+    ],
+    "instructions": [
+      "Mix 500 g boneless chicken pieces with half a cup of plain yogurt, 1 tablespoon each of minced ginger and garlic, 1 tablespoon of biryani masala, a quarter teaspoon of turmeric, half a teaspoon of chili powder, and half a teaspoon of salt. Refrigerate for 20 minutes.",
+      "Rinse 1.5 cups of basmati rice and soak for 20 minutes. Drain.",
+      "Heat 2 tablespoons of oil in a heavy saucepan. Add 1 large sliced onion and cook until golden.",
+      "Add the chicken with its marinade. Cook over medium heat for 12–15 minutes, stirring occasionally.",
+      "Add a quarter cup each of chopped mint and coriander. Stir in the drained rice and 2.5 cups of hot water.",
+      "Bring to a gentle boil. Cover tightly and cook over low heat for about 18–20 minutes, until the rice is tender and the liquid is absorbed. Add a little hot water if needed.",
+      "Check that the thickest chicken pieces reach 165°F (74°C). Turn off the heat and rest covered for 10 minutes before gently mixing."
+    ]
+  },
+  {
+    "id": "indian_chicken_65",
+    "name": "Chicken 65",
+    "cuisine": "Indian",
+    "minutes": 45,
+    "servings": 3,
+    "ingredients": [
+      "chicken", "yogurt", "ginger", "garlic",
+      "chili powder", "turmeric", "cornstarch",
+      "rice flour", "curry leaves", "lemon",
+      "oil", "salt"
+    ],
+    "instructions": [
+      "Cut 500 g boneless chicken into small, evenly sized pieces.",
+      "Mix with 3 tablespoons of plain yogurt, 1 teaspoon each of minced ginger and garlic, 1 teaspoon of chili powder, a quarter teaspoon of turmeric, and half a teaspoon of salt. Refrigerate for 20 minutes.",
+      "Mix in 2 tablespoons of cornstarch and 1 tablespoon of rice flour to coat the chicken.",
+      "Heat about 1 cm of oil in a heavy frying pan over medium heat. Carefully add the chicken in small batches.",
+      "Fry, turning occasionally, until golden and the center of the chicken reaches 165°F (74°C). Remove and drain.",
+      "In a separate pan, heat 1 teaspoon of oil. Add 8–10 washed and thoroughly dried curry leaves and cook briefly; they may splutter.",
+      "Toss the chicken with the curry leaves and 1 tablespoon of lemon juice, then serve."
+    ]
+  },
+  {
+    "id": "indian_egg_fried_rice",
+    "name": "Indo-Chinese Egg Fried Rice",
+    "cuisine": "Indian",
+    "minutes": 20,
+    "servings": 2,
+    "ingredients": [
+      "rice", "eggs", "carrot", "spring onion",
+      "garlic", "soy sauce", "pepper", "oil"
+    ],
+    "instructions": [
+      "Prepare 2 cups of cooked rice, 2 beaten eggs, 1 finely diced carrot, 2 chopped spring onions, and 2 minced garlic cloves.",
+      "Heat 1 tablespoon of oil in a large frying pan. Add the eggs and scramble until fully set. Transfer to a plate.",
+      "Add another teaspoon of oil. Cook the garlic and carrot for 3–4 minutes.",
+      "Add the rice and 1 tablespoon of soy sauce. Stir-fry until hot throughout.",
+      "Return the eggs to the pan. Add the spring onions and a quarter teaspoon of pepper.",
+      "Mix well and serve hot."
+    ]
+  },
+  {
+    "id": "indian_chicken_fried_rice",
+    "name": "Indo-Chinese Chicken Fried Rice",
+    "cuisine": "Indian",
+    "minutes": 25,
+    "servings": 2,
+    "ingredients": [
+      "rice", "chicken", "carrot", "spring onion",
+      "garlic", "soy sauce", "pepper", "oil"
+    ],
+    "instructions": [
+      "Prepare 2 cups of cooked rice. Cut 250 g boneless chicken into small pieces. Dice 1 carrot, chop 2 spring onions, and mince 2 garlic cloves.",
+      "Heat 1 tablespoon of oil in a large frying pan. Add the chicken and cook, stirring, until its center reaches 165°F (74°C). Transfer to a clean plate.",
+      "Add another teaspoon of oil. Cook the garlic and carrot for 3–4 minutes.",
+      "Add the rice and 1 tablespoon of soy sauce. Stir-fry until hot throughout.",
+      "Return the cooked chicken to the pan. Add the spring onions and a quarter teaspoon of pepper.",
+      "Mix well, heat everything through, and serve."
+    ]
+  },
+  {
+    "id": "indian_chicken_tikka",
+    "name": "Oven Chicken Tikka",
+    "cuisine": "Indian",
+    "minutes": 60,
+    "servings": 3,
+    "ingredients": [
+      "chicken", "yogurt", "ginger", "garlic",
+      "lemon", "garam masala", "cumin",
+      "chili powder", "turmeric", "oil", "salt"
+    ],
+    "instructions": [
+      "Cut 500 g boneless chicken into evenly sized pieces, about 3 cm wide.",
+      "Mix half a cup of plain yogurt with 1 tablespoon of lemon juice, 1 teaspoon each of minced ginger, minced garlic, garam masala, ground cumin, and chili powder, a quarter teaspoon of turmeric, half a teaspoon of salt, and 1 tablespoon of oil.",
+      "Coat the chicken in the marinade and refrigerate for at least 30 minutes.",
+      "Preheat the oven to 425°F (220°C). Line a baking tray with baking paper.",
+      "Arrange the chicken in a single layer with space between the pieces.",
+      "Bake for about 18–25 minutes, turning halfway through, until the thickest pieces reach 165°F (74°C).",
+      "Rest for 5 minutes before serving."
+    ]
+  },
+    {
+    "id": "indian_carrot_kurma",
+    "name": "Carrot Kurma",
+    "cuisine": "Indian",
+    "minutes": 30,
+    "servings": 3,
+    "ingredients": [
+      "carrot", "onion", "tomato", "coconut milk",
+      "ginger", "garlic", "garam masala",
+      "cumin", "turmeric", "oil", "salt"
+    ],
+    "instructions": [
+      "Slice 4 medium carrots, chop 1 onion and 1 tomato, and mince 1 teaspoon each of ginger and garlic.",
+      "Heat 1 tablespoon of oil in a saucepan. Add half a teaspoon of cumin seeds, then the onion. Cook until softened.",
+      "Add the ginger and garlic. Stir for 1 minute.",
+      "Add the tomato, a quarter teaspoon of turmeric, 1 teaspoon of garam masala, and half a teaspoon of salt. Cook for 5 minutes.",
+      "Add the carrots and half a cup of water. Cover and simmer for 10–15 minutes until the carrots are tender.",
+      "Stir in three-quarters of a cup of coconut milk. Gently simmer for 5 minutes and serve."
+    ]
+  },
+  {
+    "id": "indian_paneer_tikka_masala",
+    "name": "Paneer Tikka Masala",
+    "cuisine": "Indian",
+    "minutes": 50,
+    "servings": 3,
+    "ingredients": [
+      "paneer", "yogurt", "onion", "tomato",
+      "ginger", "garlic", "garam masala",
+      "chili powder", "cream", "oil", "salt"
+    ],
+    "instructions": [
+      "Mix 300 g cubed paneer with a quarter cup of plain yogurt, half a teaspoon each of garam masala and chili powder, and a quarter teaspoon of salt. Refrigerate for 15 minutes.",
+      "Heat 1 tablespoon of oil in a nonstick pan. Cook the paneer in a single layer, turning gently until lightly browned. Set aside.",
+      "In a saucepan, heat 1 tablespoon of oil. Add 1 finely chopped onion and cook until golden.",
+      "Add 1 teaspoon each of minced ginger and garlic. Cook for 1 minute.",
+      "Add 1 cup of pureed tomato, half a teaspoon each of garam masala and chili powder, and a quarter teaspoon of salt. Simmer for 10 minutes.",
+      "Add a quarter cup of water and a quarter cup of cream. Stir in the paneer and gently simmer for 5 minutes."
+    ]
+  },
+  {
+    "id": "indian_butter_chicken",
+    "name": "Simple Butter Chicken",
+    "cuisine": "Indian",
+    "minutes": 60,
+    "servings": 3,
+    "ingredients": [
+      "chicken", "yogurt", "tomato", "butter",
+      "cream", "ginger", "garlic",
+      "garam masala", "chili powder", "salt"
+    ],
+    "instructions": [
+      "Mix 500 g boneless chicken pieces with a quarter cup of plain yogurt, 1 teaspoon each of minced ginger and garlic, half a teaspoon each of garam masala and chili powder, and a quarter teaspoon of salt. Refrigerate for 20 minutes.",
+      "Melt 1 tablespoon of butter in a large pan over medium heat. Add the chicken with its marinade and cook for 8–10 minutes, stirring occasionally.",
+      "Add 1.5 cups of pureed tomato, half a teaspoon each of garam masala and chili powder, and a quarter teaspoon of salt.",
+      "Simmer gently for 15–20 minutes, stirring occasionally. Add a little water if the sauce becomes too thick.",
+      "Check that the thickest chicken pieces reach 165°F (74°C).",
+      "Stir in a third of a cup of cream and 1 tablespoon of butter. Gently heat for 2 minutes and serve."
+    ]
+  },
+  {
+    "id": "indian_paneer_bhurji",
+    "name": "Paneer Bhurji",
+    "cuisine": "Indian",
+    "minutes": 20,
+    "servings": 2,
+    "ingredients": [
+      "paneer", "onion", "tomato", "ginger",
+      "cumin", "turmeric", "chili powder",
+      "coriander", "oil", "salt"
+    ],
+    "instructions": [
+      "Crumble 250 g paneer. Finely chop 1 onion and 1 tomato.",
+      "Heat 1 tablespoon of oil in a pan. Add half a teaspoon of cumin seeds, then the onion. Cook until softened.",
+      "Add 1 teaspoon of minced ginger and cook for 1 minute.",
+      "Add the tomato, a quarter teaspoon of turmeric, half a teaspoon of chili powder, and half a teaspoon of salt. Cook until the tomato softens.",
+      "Add the crumbled paneer. Stir gently and cook for 3–4 minutes.",
+      "Finish with 2 tablespoons of chopped coriander and serve."
+    ]
+  },
+  {
+    "id": "indian_paneer_65",
+    "name": "Paneer 65",
+    "cuisine": "Indian",
+    "minutes": 30,
+    "servings": 3,
+    "ingredients": [
+      "paneer", "yogurt", "ginger", "garlic",
+      "chili powder", "cornstarch", "rice flour",
+      "curry leaves", "lemon", "oil", "salt"
+    ],
+    "instructions": [
+      "Cut 300 g paneer into cubes.",
+      "Mix 3 tablespoons of plain yogurt with 1 teaspoon each of minced ginger, minced garlic, and chili powder, plus half a teaspoon of salt.",
+      "Gently coat the paneer in the mixture. Add 2 tablespoons of cornstarch and 1 tablespoon of rice flour, then mix carefully.",
+      "Heat about 1 cm of oil in a frying pan over medium heat. Shallow-fry the paneer in batches, turning gently until golden. Remove and drain.",
+      "In a separate pan, heat 1 teaspoon of oil. Briefly cook 8–10 washed and thoroughly dried curry leaves; they may splutter.",
+      "Add the paneer and 1 tablespoon of lemon juice. Toss gently and serve."
+    ]
+  },
+  {
+    "id": "indian_paneer_fried_rice",
+    "name": "Indo-Chinese Paneer Fried Rice",
+    "cuisine": "Indian",
+    "minutes": 20,
+    "servings": 2,
+    "ingredients": [
+      "rice", "paneer", "carrot", "spring onion",
+      "garlic", "soy sauce", "pepper", "oil"
+    ],
+    "instructions": [
+      "Prepare 2 cups of cooked rice, 200 g cubed paneer, 1 finely diced carrot, 2 chopped spring onions, and 2 minced garlic cloves.",
+      "Heat 1 tablespoon of oil in a large pan. Lightly brown the paneer, then transfer it to a plate.",
+      "Add another teaspoon of oil. Cook the garlic and carrot for 3–4 minutes.",
+      "Add the rice and 1 tablespoon of soy sauce. Stir-fry until hot throughout.",
+      "Return the paneer to the pan. Add the spring onions and a quarter teaspoon of pepper.",
+      "Mix gently, heat everything through, and serve."
+    ]
+  },
+  {
+    "id": "indian_paneer_manchurian",
+    "name": "Indo-Chinese Paneer Manchurian",
+    "cuisine": "Indian",
+    "minutes": 30,
+    "servings": 3,
+    "ingredients": [
+      "paneer", "cornstarch", "onion", "bell pepper",
+      "garlic", "ginger", "soy sauce",
+      "ketchup", "vinegar", "oil"
+    ],
+    "instructions": [
+      "Coat 300 g paneer cubes with 2 tablespoons of cornstarch and 1 tablespoon of water.",
+      "Heat 2 tablespoons of oil in a nonstick pan. Cook the paneer, turning gently until golden. Set aside.",
+      "Add 1 teaspoon of oil to the pan. Cook 1 teaspoon each of minced garlic and ginger for 30 seconds.",
+      "Add 1 small diced onion and 1 diced bell pepper. Stir-fry for 3–4 minutes.",
+      "Add 1 tablespoon of soy sauce, 2 tablespoons of ketchup, 1 teaspoon of vinegar, and half a cup of water.",
+      "Mix 1 teaspoon of cornstarch with 1 tablespoon of cold water. Stir into the sauce and simmer until thickened.",
+      "Add the paneer, toss gently, and heat for 2 minutes before serving."
+    ]
+  },
+  {
+    "id": "indian_chicken_manchurian",
+    "name": "Indo-Chinese Chicken Manchurian",
+    "cuisine": "Indian",
+    "minutes": 35,
+    "servings": 3,
+    "ingredients": [
+      "chicken", "cornstarch", "onion", "bell pepper",
+      "garlic", "ginger", "soy sauce",
+      "ketchup", "vinegar", "oil"
+    ],
+    "instructions": [
+      "Cut 400 g boneless chicken into small, evenly sized pieces. Coat with 2 tablespoons of cornstarch and 1 tablespoon of soy sauce.",
+      "Heat 2 tablespoons of oil in a large nonstick pan. Cook the chicken in batches, turning until browned and its center reaches 165°F (74°C). Transfer to a clean plate.",
+      "Add 1 teaspoon of oil to the pan. Cook 1 teaspoon each of minced garlic and ginger for 30 seconds.",
+      "Add 1 small diced onion and 1 diced bell pepper. Stir-fry for 3–4 minutes.",
+      "Add 1 tablespoon of soy sauce, 2 tablespoons of ketchup, 1 teaspoon of vinegar, and half a cup of water.",
+      "Mix 1 teaspoon of cornstarch with 1 tablespoon of cold water. Stir into the sauce and simmer until thickened.",
+      "Return the cooked chicken to the pan. Stir and heat everything through before serving."
+    ]
+  }
+]
