@@ -1,8 +1,11 @@
-from ai_chef import render_ai_chef
 import json
+import sqlite3
+from datetime import date, timedelta
 from pathlib import Path
-from urllib.parse import quote_plus
+
 import streamlit as st
+
+from ai_chef import render_ai_chef
 
 
 st.set_page_config(
@@ -26,6 +29,8 @@ def normalize_ingredient(name):
         "pea": "peas",
         "lemons": "lemon",
         "spring onions": "spring onion",
+        "green onion": "spring onion",
+        "green onions": "spring onion",
         "scallion": "spring onion",
         "scallions": "spring onion",
         "capsicum": "bell pepper",
@@ -49,33 +54,181 @@ def normalize_ingredient(name):
         "wheat bread": "whole wheat bread",
         "shrimp": "prawns",
         "prawn": "prawns",
+        "iol": "oil",
     }
 
     return aliases.get(name, name)
 
 
-# ---------- Session state ----------
+# ---------- Saved local pantry ----------
 
-if "pantry" not in st.session_state:
-    st.session_state.pantry = []
+PANTRY_DB = Path(__file__).parent / "pantry.db"
+
+
+def read_saved_pantry():
+    with sqlite3.connect(PANTRY_DB) as connection:
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS pantry (
+                name TEXT PRIMARY KEY,
+                kind TEXT NOT NULL,
+                added_on TEXT NOT NULL,
+                remind_on TEXT NOT NULL
+            )
+            """
+        )
+
+        rows = connection.execute(
+            """
+            SELECT name, kind, added_on, remind_on
+            FROM pantry
+            ORDER BY name
+            """
+        ).fetchall()
+
+    return {
+        name: {
+            "kind": kind,
+            "added_on": added,
+            "remind_on": reminder,
+        }
+        for name, kind, added, reminder in rows
+    }
+
+
+def save_pantry_item(name, kind, added_on, remind_on):
+    with sqlite3.connect(PANTRY_DB) as connection:
+        connection.execute(
+            """
+            INSERT INTO pantry (name, kind, added_on, remind_on)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(name) DO UPDATE SET
+                kind = excluded.kind,
+                added_on = excluded.added_on,
+                remind_on = excluded.remind_on
+            """,
+            (
+                name,
+                kind,
+                added_on.isoformat(),
+                remind_on.isoformat(),
+            ),
+        )
+
+
+def remove_pantry_item(name):
+    with sqlite3.connect(PANTRY_DB) as connection:
+        connection.execute(
+            "DELETE FROM pantry WHERE name = ?",
+            (name,),
+        )
+
+
+def refresh_pantry():
+    st.session_state.pantry_records = read_saved_pantry()
+
+    # AI Chef and recipe matching still receive a list of names.
+    st.session_state.pantry = list(
+        st.session_state.pantry_records
+    )
+
+
+previous_pantry = list(st.session_state.get("pantry", []))
+refresh_pantry()
+
+# Preserve ingredients from an existing session during this upgrade.
+if "pantry_migrated" not in st.session_state:
+    for old_name in previous_pantry:
+        name = normalize_ingredient(old_name)
+
+        if name and name not in st.session_state.pantry_records:
+            save_pantry_item(
+                name,
+                "Fresh",
+                date.today(),
+                date.today() + timedelta(days=7),
+            )
+
+    st.session_state.pantry_migrated = True
+    refresh_pantry()
 
 if "show_recipes" not in st.session_state:
     st.session_state.show_recipes = False
 
-st.session_state.pantry = list(
-    dict.fromkeys(
-        normalize_ingredient(item)
-        for item in st.session_state.pantry
-        if item.strip()
-    )
-)
 
-
-def add_ingredient(name):
+def add_ingredient(name, kind=None, added_on=None, remind_on=None):
     name = normalize_ingredient(name)
 
-    if name and name not in st.session_state.pantry:
-        st.session_state.pantry.append(name)
+    # Clicking an existing ingredient does not reset its reminder.
+    if not name or name in st.session_state.pantry_records:
+        return
+
+    kind = kind or st.session_state.get(
+        "new_item_kind", "Fresh"
+    )
+
+    added_on = added_on or st.session_state.get(
+        "new_item_added", date.today()
+    )
+
+    reminder_days = 10 if kind == "Dry goods" else 7
+
+    remind_on = remind_on or (
+        added_on + timedelta(days=reminder_days)
+    )
+
+    save_pantry_item(name, kind, added_on, remind_on)
+    refresh_pantry()
+
+
+# ---------- Reminder popup ----------
+
+@st.dialog("Your pantry reminders")
+def pantry_reminder_popup():
+    st.caption(
+        "These are reminder dates, not expiry dates "
+        "or a food-safety assessment."
+    )
+
+    today = date.today()
+
+    due = {
+        name: record
+        for name, record in st.session_state.pantry_records.items()
+        if date.fromisoformat(record["remind_on"]) <= today
+    }
+
+    for name, record in due.items():
+        st.write(
+            f"**{name.title()}** — check this ingredient "
+            "and consider using it."
+        )
+
+        st.caption(
+            f"Added: {record['added_on']} • "
+            f"Reminder: {record['remind_on']}"
+        )
+
+    if not due:
+        st.success("No reminders are due.")
+
+    if due and st.button(
+        "Remind me tomorrow",
+        key="snooze_reminders",
+    ):
+        for name, record in due.items():
+            save_pantry_item(
+                name,
+                record["kind"],
+                date.fromisoformat(record["added_on"]),
+                today + timedelta(days=1),
+            )
+
+        refresh_pantry()
+        st.rerun()
+
+    if st.button("Close reminders", key="close_reminders"):
+        st.rerun()
 
 
 # ---------- Grocery shelf ----------
@@ -126,6 +279,8 @@ groceries = {
     },
     "Pantry & dairy": {
         "Rice": "🍚",
+        "Toor dal": "🫘",
+        "Noodles": "🍜",
         "Bread": "🍞",
         "Whole wheat bread": "🍞",
         "Sourdough bread": "🍞",
@@ -181,7 +336,7 @@ groceries = {
 }
 
 
-# ---------- Design and background animation ----------
+# ---------- Design and animation ----------
 
 st.markdown(
     """
@@ -339,6 +494,7 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
+
 st.markdown(
     '<div class="floating-groceries" aria-hidden="true">'
     '<span>🥕</span>'
@@ -352,44 +508,110 @@ st.markdown(
     '</div>',
     unsafe_allow_html=True,
 )
+
 st.markdown(
     '<div class="grocery-border">🥕 🍅 🥦 🍋 🧅 🥑 🍚 🥬</div>',
     unsafe_allow_html=True,
 )
 
 st.markdown(
-    """
-    <div class="hero">
-        <h1>Whats in your kitchen today?</h1>
-        <p>A little pantry inspiration for your next delicious meal.</p>
-    </div>
-    """,
+    '<div class="hero">'
+    '<h1>What’s in your kitchen today?</h1>'
+    '<p>A little pantry inspiration for your next delicious meal.</p>'
+    '</div>',
     unsafe_allow_html=True,
 )
-with st.expander("AI Chef — Create a recipe with your ingredients", expanded=True):
+
+
+# ---------- Show due reminders ----------
+
+today = date.today()
+
+due_items = {
+    name: record
+    for name, record in st.session_state.pantry_records.items()
+    if date.fromisoformat(record["remind_on"]) <= today
+}
+
+if due_items:
+    st.warning(
+        "Pantry reminders due: "
+        + ", ".join(name.title() for name in due_items)
+    )
+
+    open_reminders = st.button(
+        "View pantry reminders",
+        key="open_reminders",
+    )
+
+    if (
+        open_reminders
+        or st.session_state.get("reminders_shown_on")
+        != today.isoformat()
+    ):
+        st.session_state.reminders_shown_on = today.isoformat()
+        pantry_reminder_popup()
+
+
+# ---------- AI Chef ----------
+
+with st.expander(
+    "AI Chef — Create a recipe with your ingredients",
+    expanded=True,
+):
     render_ai_chef()
 
 st.divider()
 
 
-# ---------- Enter ingredients ----------
+# ---------- Add ingredients ----------
+
+st.subheader("Add to your saved pantry")
+
+st.caption(
+    "Fresh: 7-day reminder • Dry goods: 10-day reminder. "
+    "These are reminders, not expiry estimates."
+)
+
+kind_col, date_col = st.columns(2)
+
+with kind_col:
+    new_kind = st.selectbox(
+        "Reminder category for new items",
+        ["Fresh", "Dry goods"],
+        key="new_item_kind",
+    )
+
+with date_col:
+    added_date = st.date_input(
+        "Date added",
+        value=date.today(),
+        max_value=date.today(),
+        key="new_item_added",
+    )
+
+st.caption(
+    "Grocery shelf clicks use the category and date selected above. "
+    "Add fresh and dry ingredients separately."
+)
 
 with st.form("ingredient_search", clear_on_submit=True):
-    search_col, add_col = st.columns([4, 1])
+    ingredient_text = st.text_input(
+        "Enter ingredients",
+        placeholder="Try eggs, cheese, butter, salt...",
+    )
 
-    with search_col:
-        ingredient_text = st.text_input(
-            "Enter ingredients",
-            placeholder="Try eggs, cheese, butter, salt...",
-        )
+    custom_reminder = st.date_input(
+        "Reminder date for these ingredients",
+        value=added_date + timedelta(
+            days=10 if new_kind == "Dry goods" else 7
+        ),
+    )
 
-    with add_col:
-        st.write("")
-        st.write("")
-        submitted = st.form_submit_button(
-            "Add ingredients",
-            use_container_width=True,
-        )
+    submitted = st.form_submit_button(
+        "Add ingredients",
+        use_container_width=True,
+    )
 
     if submitted:
         entered_items = [
@@ -400,13 +622,19 @@ with st.form("ingredient_search", clear_on_submit=True):
 
         if entered_items:
             for item in entered_items:
-                add_ingredient(item)
+                add_ingredient(
+                    item,
+                    new_kind,
+                    added_date,
+                    custom_reminder,
+                )
+
             st.rerun()
         else:
             st.warning("Enter at least one ingredient.")
 
 
-# ---------- Browse and search groceries ----------
+# ---------- Browse groceries ----------
 
 st.subheader("Browse your grocery shelf")
 st.caption("Click an ingredient to add it to your pantry.")
@@ -475,28 +703,63 @@ else:
                         st.rerun()
 
 
-# ---------- Selected pantry ----------
+# ---------- Manage saved pantry ----------
 
 st.divider()
-st.subheader("My pantry")
+st.subheader("My saved pantry")
 
 if st.session_state.pantry:
-    st.caption("Click a selected ingredient to remove it.")
-    columns = st.columns(3)
+    for name, record in st.session_state.pantry_records.items():
+        with st.expander(
+            f"{name.title()} • Reminder: {record['remind_on']}"
+        ):
+            st.caption(
+                f"{record['kind']} • Added: {record['added_on']}"
+            )
 
-    for index, name in enumerate(st.session_state.pantry):
-        with columns[index % 3]:
+            with st.form(f"edit_item_{name}"):
+                edited_kind = st.selectbox(
+                    "Category",
+                    ["Fresh", "Dry goods"],
+                    index=0 if record["kind"] == "Fresh" else 1,
+                    key=f"kind_{name}",
+                )
+
+                edited_date = st.date_input(
+                    "Reminder date",
+                    value=date.fromisoformat(record["remind_on"]),
+                    key=f"reminder_{name}",
+                )
+
+                if st.form_submit_button("Save reminder"):
+                    save_pantry_item(
+                        name,
+                        edited_kind,
+                        date.fromisoformat(record["added_on"]),
+                        edited_date,
+                    )
+
+                    refresh_pantry()
+                    st.rerun()
+
             if st.button(
-                f"{name.title()}  ×",
+                "Used up / remove",
                 key=f"remove_{name}",
-                use_container_width=True,
             ):
-                st.session_state.pantry.remove(name)
+                remove_pantry_item(name)
+                refresh_pantry()
                 st.rerun()
 
-    if st.button("Clear pantry", key="clear_pantry"):
-        st.session_state.pantry = []
-        st.rerun()
+    if st.checkbox(
+        "I want to clear my saved pantry",
+        key="confirm_clear_pantry",
+    ):
+        if st.button("Clear pantry", key="clear_pantry"):
+            with sqlite3.connect(PANTRY_DB) as connection:
+                connection.execute("DELETE FROM pantry")
+
+            refresh_pantry()
+            st.rerun()
 else:
     st.info("Your basket is waiting! Search above or pick a grocery.")
 
@@ -507,7 +770,7 @@ st.subheader("What cuisine are you craving?")
 
 selected_cuisine = st.selectbox(
     "Choose a cuisine",
-    options=[
+    [
         "Any cuisine",
         "Indian",
         "Korean",
@@ -522,7 +785,7 @@ selected_cuisine = st.selectbox(
 
 diet_preference = st.selectbox(
     "Food preference",
-    options=[
+    [
         "All recipes",
         "Vegetarian (no meat, seafood, or eggs)",
         "Vegetarian + eggs",
@@ -551,7 +814,7 @@ if st.button(
     st.session_state.show_recipes = True
 
 
-# ---------- Load and validate recipes ----------
+# ---------- Load saved recipes ----------
 
 if st.session_state.show_recipes:
     if not st.session_state.pantry:
@@ -611,12 +874,13 @@ if st.session_state.show_recipes:
                 or not isinstance(recipe["minutes"], (int, float))
             ):
                 st.error(
-                    f"Check the ingredients, instructions, and minutes "
-                    f"in recipe {position}."
+                    f"Check the ingredients, instructions, "
+                    f"and minutes in recipe {position}."
                 )
                 st.stop()
 
-        # ---------- Strict recipe matching ----------
+
+        # ---------- Match recipes ----------
 
         pantry = {
             normalize_ingredient(item)
@@ -638,6 +902,7 @@ if st.session_state.show_recipes:
             "shrimp paste",
             "chicken stock",
         }
+
         matches = []
 
         for recipe in recipes:
@@ -651,15 +916,14 @@ if st.session_state.show_recipes:
                 continue
 
             required = {
-                normalize_ingredient(ingredient)
-                for ingredient in recipe["ingredients"]
+                normalize_ingredient(item)
+                for item in recipe["ingredients"]
             }
 
             if diet_preference != "All recipes":
                 if required & meat_and_seafood:
                     continue
 
-                # Generic kimchi may contain seafood.
                 if "kimchi" in required:
                     continue
 
@@ -689,7 +953,7 @@ if st.session_state.show_recipes:
                     "score": len(available) / len(required),
                 })
 
-            matches.sort(
+        matches.sort(
             key=lambda match: (
                 -match["score"],
                 len(match["missing"]),
@@ -697,19 +961,22 @@ if st.session_state.show_recipes:
             )
         )
 
-        # ---------- Display recipe cards ----------
+
+        # ---------- Recipe cards ----------
 
         if not matches:
             st.info(
-                "No recipes can be made with only these ingredients yet. "
-                "Check your pantry, cuisine, food preference, and time limit."
+                "No matching saved recipes found yet. "
+                "Check your pantry, cuisine, food preference, "
+                "and time limit."
             )
         else:
             st.subheader("Here's what you could cook")
 
             st.caption(
                 f"{len(matches)} matching recipes. "
-                "Quickest recipes appear first."
+                "Best ingredient matches appear first, "
+                "then cooking time."
             )
 
             for match in matches:
@@ -725,26 +992,25 @@ if st.session_state.show_recipes:
                     )
 
                     percentage = round(match["score"] * 100)
-                    st.write(f"**{percentage}% ingredient match**")
+
+                    st.write(
+                        f"**{percentage}% ingredient match**"
+                    )
+
+                    st.write(
+                        "**Ingredients from your pantry:** "
+                        + ", ".join(match["available"])
+                    )
 
                     if match["missing"]:
                         st.write(
                             "**Suggested additions:** "
                             + ", ".join(match["missing"])
                         )
-                       
-                    
                     else:
-                        st.success("You have all the listed ingredients!")
-                    video_query = quote_plus(
-                        f'{recipe["name"]} {recipe["cuisine"]} recipe'
-                    )
-
-                    
-                    st.write(
-                        "**Ingredients from your pantry:** "
-                        + ", ".join(match["available"])
-                    )
+                        st.success(
+                            "You have all the listed ingredients!"
+                        )
 
                     with st.expander("View cooking instructions"):
                         for number, step in enumerate(
@@ -752,4 +1018,44 @@ if st.session_state.show_recipes:
                             start=1,
                         ):
                             st.write(f"{number}. {step}")
-                           
+        st.markdown(
+    """
+        <style>
+/* Dropdown options */
+[role="listbox"] [role="option"],
+[role="listbox"] [role="option"] *,
+[data-baseweb="menu"] li,
+[data-baseweb="menu"] li * {
+    color: #a64b20 !important;
+    -webkit-text-fill-color: #a64b20 !important;
+}
+
+/* Calendar — current and older Streamlit versions */
+[data-testid="stDateInputCalendar"],
+[data-baseweb="calendar"] {
+    background-color: #fffaf0 !important;
+}
+
+[data-testid="stDateInputCalendar"],
+[data-testid="stDateInputCalendar"] *,
+[data-baseweb="calendar"],
+[data-baseweb="calendar"] * {
+    color: #263b29 !important;
+    -webkit-text-fill-color: #263b29 !important;
+}
+
+/* Selected date */
+[data-testid="stDateInputCalendar"] [data-selected="true"],
+[data-testid="stDateInputCalendar"] [data-selected="true"] *,
+[data-testid="stDateInputCalendar"] [aria-selected="true"],
+[data-testid="stDateInputCalendar"] [aria-selected="true"] *,
+[data-baseweb="calendar"] [aria-selected="true"],
+[data-baseweb="calendar"] [aria-selected="true"] * {
+    background-color: #315c3b !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+}
+</style>
+""",
+    unsafe_allow_html=True,
+)
