@@ -1,3 +1,4 @@
+from ai_chef import render_ai_chef
 import json
 from pathlib import Path
 from urllib.parse import quote_plus
@@ -365,6 +366,10 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+with st.expander("AI Chef — Create a recipe with your ingredients", expanded=True):
+    render_ai_chef()
+
+st.divider()
 
 
 # ---------- Enter ingredients ----------
@@ -727,21 +732,15 @@ if st.session_state.show_recipes:
                             "**Suggested additions:** "
                             + ", ".join(match["missing"])
                         )
-                        st.caption(
-                            "The instructions below use the full recipe. "
-                            "Check suggested additions before cooking."
-                        )
+                       
+                    
                     else:
                         st.success("You have all the listed ingredients!")
                     video_query = quote_plus(
                         f'{recipe["name"]} {recipe["cuisine"]} recipe'
                     )
 
-                    st.link_button(
-                        "Watch recipe videos on YouTube",
-                        f"https://www.youtube.com/results?search_query={video_query}",
-                        use_container_width=True,
-                    )
+                    
                     st.write(
                         "**Ingredients from your pantry:** "
                         + ", ".join(match["available"])
@@ -753,3 +752,4 @@ if st.session_state.show_recipes:
                             start=1,
                         ):
                             st.write(f"{number}. {step}")
+                           
