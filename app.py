@@ -1,4 +1,5 @@
 import sqlite3
+from favorites import render_favorites
 from food_game import render_food_game
 from datetime import date, timedelta
 from pathlib import Path
@@ -624,8 +625,13 @@ if due_items:
 
 # ---------- Main navigation ----------
 
-pantry_tab, chef_tab, shopping_tab = st.tabs(
-    ["My Pantry", "AI Chef", "Shopping List"]
+pantry_tab, chef_tab, shopping_tab, favorites_tab = st.tabs(
+    [
+        "My Pantry",
+        "AI Chef",
+        "Shopping List",
+        "Favorites",
+    ]
 )
 
 
@@ -888,3 +894,9 @@ with chef_tab:
 
 with shopping_tab:
     render_shopping_list()
+
+    
+# ---------- Favorites ----------
+
+with favorites_tab:
+    render_favorites()

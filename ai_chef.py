@@ -1,4 +1,5 @@
 import re
+from favorites import render_save_favorite
 from urllib.parse import quote_plus
 
 import requests
@@ -66,7 +67,36 @@ Example: ## Chicken Noodles
 
 Write a brief description on a separate line.
 Leave blank lines between headings, paragraphs, and sections.
-Use bold labels for Cuisine, Total time, and Servings.
+Use bold labels for Cuisine, Food type, Total time, and Servings.
+
+Cuisine must be exactly one of:
+Indian, Chinese, Italian, Korean, Japanese, Thai, American,
+Mexican, Other / mixed, Not specified.
+
+Choose the cuisine based on the actual recipe, not just
+the user's selected cuisine preference.
+
+Food type must be exactly one of:
+Vegetarian, Contains eggs, Non-vegetarian, Not checked.
+
+Classify the actual base recipe, including essential additions
+and sauces. Do not classify it from the pantry or preference alone.
+
+- Non-vegetarian: contains meat, seafood, animal broth,
+  fish sauce, or gelatin, even if it also contains eggs.
+- Contains eggs: contains eggs but no meat or seafood
+  or other non-vegetarian ingredients.
+- Vegetarian: contains no eggs, meat, seafood, animal broth,
+  fish sauce, or gelatin.
+- Not checked: the classification is uncertain.
+
+Write these labels on separate lines using this format:
+**Cuisine:** Chinese
+**Food type:** Non-vegetarian
+
+Those are formatting examples, not fixed values.
+Optional serving variations do not change the base recipe's category.
+Do not claim that gluten-free status has been verified.
 Put each label on its own line.
 
 Use these sections, each only once:
@@ -371,6 +401,23 @@ def render_ai_chef():
 
             recipe_name = get_recipe_name(answer)
 
+            st.download_button(
+                "Download recipe",
+                data=answer,
+                file_name="my_ai_recipe.md",
+                mime="text/markdown",
+                key="download_ai_recipe",
+            )
+
+            render_save_favorite(
+                answer,
+                get_recipe_name(answer),
+                st.session_state.get(
+                    "ai_recipe_context",
+                    {},
+                ),
+            )
+
             # One YouTube search link.
             if recipe_name:
                 youtube_query = quote_plus(
@@ -482,12 +529,4 @@ def render_ai_chef():
                         )
                     )
                     + " minutes"
-                )
-
-            st.download_button(
-                "Download recipe",
-                data=answer,
-                file_name="my_ai_recipe.md",
-                mime="text/markdown",
-                key="download_ai_recipe",
-            )
+                ) 
