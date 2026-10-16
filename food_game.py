@@ -215,9 +215,24 @@ def render_food_game():
         game = st.session_state.food_game
         pairs_found = len(game["matched"]) // 2
 
-        left, right = st.columns(2)
-        left.metric("Pairs found", f"{pairs_found} / 8")
-        right.metric("Moves", game["moves"])
+        best_moves = st.session_state.get("food_game_best")
+
+        if pairs_found == 8:
+            if (
+                best_moves is None
+                or game["moves"] < best_moves
+            ):
+                st.session_state.food_game_best = game["moves"]
+                best_moves = game["moves"]
+
+        first, second, third = st.columns(3)
+
+        first.metric("Pairs found", f"{pairs_found} / 8")
+        second.metric("Moves", game["moves"])
+        third.metric(
+            "Best moves",
+            best_moves if best_moves is not None else "—",
+        )
 
         st.progress(pairs_found / 8)
 
