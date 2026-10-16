@@ -107,7 +107,7 @@ NUTRITION:
 OUTPUT:
 Start with ## followed by only the dish name.
 Write a short description on a separate line.
-Then write each of these labels with a value in its own paragraph:
+Then write each label with its value in a separate paragraph:
 **Cuisine:**
 **Food type:**
 **Total time:**
@@ -130,10 +130,109 @@ class RecipeError(ValueError):
     pass
 
 
+SECTION_NAMES = {
+    "ingredients",
+    "recipe ingredients",
+    "equipment",
+    "instructions",
+    "cooking steps",
+    "estimated nutrition per serving",
+    "nutrition",
+    "useful tip",
+    "method",
+    "directions",
+    "description",
+}
+
+
 def clean_line(line):
     line = line.strip().replace("**", "").replace("__", "")
     line = re.sub(r"^#{1,6}\s*", "", line)
     return line.strip()
+
+
+def get_recipe_name(answer, request=""):
+    lines = [
+        line.strip()
+        for line in answer.splitlines()
+        if line.strip()
+    ]
+
+    # Look for an explicit label or Markdown title first.
+    for line in lines[:15]:
+        text = clean_line(line)
+
+        match = re.match(
+            r"^(?:recipe name|recipe title|dish name)\s*:\s*(.+)$",
+            text,
+            re.I,
+        )
+
+        if match:
+            return match.group(1).strip()
+
+        if (
+            re.match(r"^#{1,2}\s+", line)
+            and text.casefold().rstrip(":") not in SECTION_NAMES
+            and ":" not in text
+        ):
+            return text
+
+    # Also accept a short plain or bold title near the beginning.
+    for line in lines[:3]:
+        text = clean_line(line)
+
+        if text.casefold().startswith(
+            ("sure", "here is", "here's", "certainly")
+        ):
+            continue
+
+        if (
+            len(text.split()) <= 10
+            and len(text) <= 80
+            and text.casefold().rstrip(":") not in SECTION_NAMES
+            and not re.search(r"[:.!?]", text)
+            and not re.match(r"^[-*•\d]", text)
+        ):
+            return text
+
+        break
+
+    if request.strip():
+        return "Recipe: " + request.strip().splitlines()[0][:100]
+
+    return "My cooking recipe"
+
+
+def ensure_recipe_title(answer, request="", preferred_name=""):
+    name = preferred_name or get_recipe_name(answer, request)
+    lines = answer.strip().splitlines()
+
+    first = next(
+        (index for index, line in enumerate(lines) if line.strip()),
+        None,
+    )
+
+    if first is not None:
+        text = clean_line(lines[first])
+
+        labeled = re.match(
+            r"^(?:recipe name|recipe title|dish name)\s*:\s*(.+)$",
+            text,
+            re.I,
+        )
+
+        if (
+            text == name
+            or (
+                labeled
+                and labeled.group(1).strip() == name
+            )
+        ):
+            lines.pop(first)
+
+    body = "\n".join(lines).strip()
+    return name, f"## {name}\n\n{body}"
 
 
 def recipe_sections(answer):
@@ -146,6 +245,7 @@ def recipe_sections(answer):
         "nutrition per serving": "estimated nutrition per serving",
         "tip": "useful tip",
     }
+
     known = {
         "recipe ingredients",
         "equipment",
@@ -190,10 +290,17 @@ def normalize_labels(answer):
 
     for line in answer.splitlines():
         cleaned = clean_line(line)
-        match = re.match(r"^([^:：]+)\s*[:：]\s*(.+)$", cleaned)
+
+        match = re.match(
+            r"^([^:：]+)\s*[:：]\s*(.+)$",
+            cleaned,
+        )
 
         if match:
-            name = aliases.get(match.group(1).strip().casefold())
+            name = aliases.get(
+                match.group(1).strip().casefold()
+            )
+
             if name:
                 result.extend([
                     f"**{name}:** {match.group(2).strip()}",
@@ -206,21 +313,20 @@ def normalize_labels(answer):
     return "\n".join(result).strip()
 
 
-def get_recipe_name(answer):
-    for line in answer.splitlines():
-        if re.match(r"^#{1,2}\s+", line.strip()):
-            return clean_line(line)
-    return "My recipe"
-
-
 def shopping_draft(answer):
-    ingredients = recipe_sections(answer).get("recipe ingredients", "")
+    ingredients = recipe_sections(answer).get(
+        "recipe ingredients",
+        "",
+    )
+
     items = []
 
     for line in ingredients.splitlines():
         match = re.match(r"^\s*[-*+•]\s+(.+)", line)
+
         if match:
             item = match.group(1).replace("**", "").strip()
+
             if item:
                 items.append(item)
 
@@ -229,30 +335,48 @@ def shopping_draft(answer):
 
 def due_pantry_items(pantry):
     records = st.session_state.get("pantry_records", {})
+
     if not isinstance(records, dict):
         return []
 
-    selected = {str(item).casefold() for item in pantry}
+    selected = {
+        str(item).casefold()
+        for item in pantry
+    }
+
     due = []
 
     for name, record in records.items():
         if str(name).casefold() not in selected:
             continue
+
         if not isinstance(record, dict):
             continue
 
         try:
-            reminder = date.fromisoformat(str(record.get("remind_on", "")))
+            reminder = date.fromisoformat(
+                str(record.get("remind_on", ""))
+            )
         except ValueError:
             continue
 
         if reminder <= date.today():
             due.append((reminder, str(name)))
 
-    return [name for _, name in sorted(due)]
+    return [
+        name
+        for _, name in sorted(due)
+    ]
 
 
-def build_messages(question, pantry, cuisine, preference, minutes, priority):
+def build_messages(
+    question,
+    pantry,
+    cuisine,
+    preference,
+    minutes,
+    priority,
+):
     user_prompt = f"""
 Request: {question}
 Pantry reference: {", ".join(pantry) or "None confirmed"}
@@ -262,18 +386,24 @@ Preferred preparation plus cooking time: {minutes} minutes
 Compatible reminder priorities: {", ".join(priority) or "None"}
 
 Give the requested dish even if ingredients need to be purchased.
+Start with the recipe name as a Markdown heading.
 Provide one ingredient list and detailed beginner instructions.
 Explain if the requested time is unrealistic.
 """
 
     return [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": user_prompt},
+        {
+            "role": "system",
+            "content": SYSTEM_PROMPT,
+        },
+        {
+            "role": "user",
+            "content": user_prompt,
+        },
     ]
 
 
 def stream_recipe(messages, on_update):
-    """Read Ollama's streamed JSON events and return a completed answer."""
     parts = []
     completed = False
     last_update = 0.0
@@ -298,6 +428,7 @@ def stream_recipe(messages, on_update):
         if not response.ok:
             try:
                 payload = response.json()
+
                 details = (
                     payload.get("error", response.text)
                     if isinstance(payload, dict)
@@ -317,24 +448,31 @@ def stream_recipe(messages, on_update):
             event = json.loads(raw)
 
             if not isinstance(event, dict):
-                raise RecipeError("Ollama returned an invalid stream event.")
+                raise RecipeError(
+                    "Ollama returned an invalid stream event."
+                )
 
             if event.get("error"):
                 raise RecipeError(str(event["error"]))
 
             message = event.get("message", {})
+
             if not isinstance(message, dict):
-                raise RecipeError("Ollama returned an invalid message.")
+                raise RecipeError(
+                    "Ollama returned an invalid message."
+                )
 
             chunk = message.get("content", "")
+
             if not isinstance(chunk, str):
-                raise RecipeError("Ollama returned invalid recipe text.")
+                raise RecipeError(
+                    "Ollama returned invalid recipe text."
+                )
 
             if chunk:
                 parts.append(chunk)
-
-                # Update a few times per second, not for every token.
                 now = time.monotonic()
+
                 if now - last_update >= 0.15:
                     on_update("".join(parts))
                     last_update = now
@@ -365,7 +503,13 @@ def stream_recipe(messages, on_update):
 
 
 def render_recipe_tools(answer, context):
-    recipe_name = get_recipe_name(answer)
+    recipe_name = (
+        context.get("recipe_name")
+        or get_recipe_name(
+            answer,
+            context.get("request", ""),
+        )
+    )
 
     st.download_button(
         "Download recipe",
@@ -375,7 +519,11 @@ def render_recipe_tools(answer, context):
         key="download_ai_recipe",
     )
 
-    render_save_favorite(answer, recipe_name, context)
+    render_save_favorite(
+        answer,
+        recipe_name,
+        context,
+    )
 
     st.link_button(
         "Find cooking videos on YouTube",
@@ -383,18 +531,24 @@ def render_recipe_tools(answer, context):
         + quote_plus(f"{recipe_name} recipe"),
         use_container_width=True,
     )
+
     st.caption(
         "YouTube results may use different ingredients or methods."
     )
 
-    with st.expander("Build a shopping list from this recipe"):
+    with st.expander(
+        "Build a shopping list from this recipe"
+    ):
         st.caption(
-            "This draft includes all recipe ingredients. Remove items "
-            "you already have and optional extras you do not want."
+            "This draft includes all recipe ingredients. "
+            "Remove items you already have and optional "
+            "extras you do not want."
         )
 
         if "shopping_recipe_draft" not in st.session_state:
-            st.session_state.shopping_recipe_draft = shopping_draft(answer)
+            st.session_state.shopping_recipe_draft = (
+                shopping_draft(answer)
+            )
 
         draft = st.text_area(
             "Shopping items, one per line",
@@ -402,17 +556,27 @@ def render_recipe_tools(answer, context):
             height=160,
         )
 
-        if st.button("Add to shopping list", key="recipe_to_shopping"):
+        if st.button(
+            "Add to shopping list",
+            key="recipe_to_shopping",
+        ):
             if draft.strip():
-                added = add_shopping_items(draft.splitlines())
+                added = add_shopping_items(
+                    draft.splitlines()
+                )
+
                 st.success(
                     f"Added {added} new items. "
                     "Open Shopping List to view them."
                 )
             else:
-                st.info("Enter the ingredients you want to buy.")
+                st.info(
+                    "Enter the ingredients you want to buy."
+                )
 
     with st.expander("Details of this suggestion"):
+        st.write("**Recipe name:** " + recipe_name)
+
         st.write(
             "**Selected pantry:** "
             + (
@@ -420,16 +584,22 @@ def render_recipe_tools(answer, context):
                 or "No pantry ingredients selected."
             )
         )
+
         st.write(
-            "**Request:** " + context.get("request", "Not recorded.")
+            "**Request:** "
+            + context.get("request", "Not recorded.")
         )
+
         st.write(
-            "**Cuisine:** " + context.get("cuisine", "Any cuisine")
+            "**Cuisine:** "
+            + context.get("cuisine", "Any cuisine")
         )
+
         st.write(
             "**Food preference:** "
             + context.get("preference", "All recipes")
         )
+
         st.write(
             "**Requested time limit:** "
             + str(context.get("minutes", "Not recorded"))
@@ -443,25 +613,35 @@ def render_recipe_tools(answer, context):
             )
 
         if context.get("generation_seconds") is not None:
+            seconds = context["generation_seconds"]
+
             st.caption(
-                f"Generated in {context['generation_seconds']:.0f} seconds "
+                f"Generated in {seconds:.0f} seconds "
                 f"using {context.get('model', MODEL)}."
             )
 
 
 def render_ai_chef():
     st.subheader("What would you like to cook?")
-    st.caption("Search any dish, or get inspiration from your pantry.")
+    st.caption(
+        "Search any dish, or get inspiration from your pantry."
+    )
 
     pantry = [
-        str(item) for item in st.session_state.get("pantry", [])
+        str(item)
+        for item in st.session_state.get("pantry", [])
     ]
+
     due_items = due_pantry_items(pantry)
 
     with st.container(border=True):
         if pantry:
-            with st.expander(f"Your pantry · {len(pantry)} ingredients"):
-                st.write(", ".join(item.title() for item in pantry))
+            with st.expander(
+                f"Your pantry · {len(pantry)} ingredients"
+            ):
+                st.write(
+                    ", ".join(item.title() for item in pantry)
+                )
         else:
             st.info(
                 "Search any recipe with an empty pantry "
@@ -472,8 +652,8 @@ def render_ai_chef():
             question = st.text_area(
                 "Describe your meal",
                 placeholder=(
-                    "Indian-style chicken stir-fried noodles for "
-                    "2 people. Explain each step for a beginner."
+                    "Indian-style chicken stir-fried noodles "
+                    "for 2 people. Explain each step for a beginner."
                 ),
                 height=130,
                 key="ai_request",
@@ -505,8 +685,15 @@ def render_ai_chef():
                 cuisine = st.selectbox(
                     "Cuisine inspiration",
                     [
-                        "Any cuisine", "Indian", "Korean", "Japanese",
-                        "Chinese", "Thai", "American", "Italian", "Mexican",
+                        "Any cuisine",
+                        "Indian",
+                        "Korean",
+                        "Japanese",
+                        "Chinese",
+                        "Thai",
+                        "American",
+                        "Italian",
+                        "Mexican",
                     ],
                     key="ai_cuisine",
                 )
@@ -533,7 +720,7 @@ def render_ai_chef():
             )
 
             st.caption(
-                "The recipe will appear as it is written. "
+                "The recipe appears as it is written. "
                 "Initial model loading may take a moment."
             )
 
@@ -543,24 +730,27 @@ def render_ai_chef():
                 use_container_width=True,
             )
 
-    # This placeholder holds either the live preview or the saved answer.
     output = st.empty()
 
     if submitted:
         selected_pantry = pantry if use_pantry else []
+
         selected_priority = (
-            due_items if use_pantry and prioritize_due else []
+            due_items
+            if use_pantry and prioritize_due
+            else []
         )
 
         if not question.strip() and not selected_pantry:
-            st.warning("Enter a dish or select pantry ingredients.")
+            st.warning(
+                "Enter a dish or select pantry ingredients."
+            )
         else:
             request_text = (
                 question.strip()
                 or "Suggest a meal using my pantry ingredients."
             )
 
-            # Do not leave an older answer looking like the new result.
             for key in (
                 "ai_recipe",
                 "ai_recipe_context",
@@ -572,14 +762,17 @@ def render_ai_chef():
             try:
                 with output.container():
                     status = st.empty()
-                    status.info(
-                        "Starting AI Chef… The recipe will appear below."
-                    )
                     preview = st.empty()
+
+                    status.info(
+                        "Starting AI Chef… "
+                        "The recipe will appear below."
+                    )
 
                     def show_update(text):
                         status.caption(
-                            "Writing your recipe… Please wait for completion."
+                            "Writing your recipe… "
+                            "Please wait for completion."
                         )
                         preview.markdown(text + " ▌")
 
@@ -594,11 +787,22 @@ def render_ai_chef():
                         selected_priority,
                     )
 
-                    answer = stream_recipe(messages, show_update)
+                    answer = stream_recipe(
+                        messages,
+                        show_update,
+                    )
+
                     answer = normalize_labels(answer)
 
+                    recipe_name, answer = ensure_recipe_title(
+                        answer,
+                        request_text,
+                    )
+
                     st.session_state.ai_recipe = answer
+
                     st.session_state.ai_recipe_context = {
+                        "recipe_name": recipe_name,
                         "pantry": selected_pantry,
                         "request": request_text,
                         "cuisine": cuisine,
@@ -606,7 +810,9 @@ def render_ai_chef():
                         "minutes": minutes,
                         "priority": selected_priority,
                         "model": MODEL,
-                        "generation_seconds": time.monotonic() - started,
+                        "generation_seconds": (
+                            time.monotonic() - started
+                        ),
                     }
 
                     st.session_state.shopping_recipe_draft = (
@@ -615,6 +821,7 @@ def render_ai_chef():
 
             except requests.exceptions.Timeout:
                 output.empty()
+
                 st.error(
                     "Ollama took too long to respond. "
                     "The unfinished recipe was not saved."
@@ -622,6 +829,7 @@ def render_ai_chef():
 
             except requests.exceptions.ConnectionError:
                 output.empty()
+
                 st.error(
                     "The connection to Ollama failed or was interrupted. "
                     "Keep the Ollama server running and try again."
@@ -631,20 +839,39 @@ def render_ai_chef():
                 output.empty()
                 st.error(str(error))
 
-            except (ValueError, requests.exceptions.RequestException):
+            except (
+                ValueError,
+                requests.exceptions.RequestException,
+            ):
                 output.empty()
+
                 st.error(
                     "Could not complete the streamed response. "
-                    "The unfinished recipe was not saved. Please try again."
+                    "The unfinished recipe was not saved. "
+                    "Please try again."
                 )
 
     answer = st.session_state.get("ai_recipe")
+
     if not answer:
         return
 
-    context = st.session_state.get("ai_recipe_context", {})
+    context = st.session_state.get(
+        "ai_recipe_context",
+        {},
+    )
 
-    # Replace the live preview with the final answer in the same location.
+    # Also add a heading to an answer already in this session.
+    recipe_name, answer = ensure_recipe_title(
+        answer,
+        context.get("request", ""),
+        context.get("recipe_name", ""),
+    )
+
+    context["recipe_name"] = recipe_name
+    st.session_state.ai_recipe = answer
+    st.session_state.ai_recipe_context = context
+
     with output.container():
         st.divider()
 
@@ -653,5 +880,10 @@ def render_ai_chef():
                 "AI-generated recipe · Review before cooking. "
                 "Nutrition values are approximate AI estimates."
             )
+
             st.markdown(answer)
-            render_recipe_tools(answer, context)
+
+            render_recipe_tools(
+                answer,
+                context,
+            )
